@@ -1,0 +1,37 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "document": {
+      "type": "object"
+    },
+    "schema": {
+      "const": "ask_herdr.schema_document.v1",
+      "type": "string"
+    },
+    "schema_id": {
+      "enum": [
+        "ask_herdr.describe.v1",
+        "ask_herdr.outcome.v1",
+        "ask_herdr.request.v1",
+        "ask_herdr.schema_document.v1"
+      ],
+      "type": "string"
+    },
+    "semantic_version": {
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "document",
+    "schema",
+    "schema_id",
+    "semantic_version",
+    "sha256"
+  ],
+  "type": "object"
+}
