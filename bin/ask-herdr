@@ -22,10 +22,16 @@ SOURCE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SOURCE_ROOT / "lib"))
 
 from ask_herdr_json import StrictJsonError, canonical_json, parse_json_object
-from ask_herdr_machine_validate import (
+from ask_herdr_discovery_contract import (
+    DESCRIBE_V3_SCHEMA_ID,
+    DESCRIBE_V3_SCHEMA_PATH,
+    SCHEMA_DOCUMENT_V3_SCHEMA_ID,
+    SCHEMA_DOCUMENT_V3_SCHEMA_PATH,
+)
+from ask_herdr_platform import runtime_execution_supported, runtime_platform
+from ask_herdr_request_header import (
     TrustedHeaderError,
     trust_request_header,
-    validate_request,
 )
 
 
@@ -40,8 +46,8 @@ REQUEST_SCHEMA_PATH = SOURCE_ROOT / "schemas" / "ask_herdr.request.v1.schema.jso
 OUTCOME_SCHEMA_ID = "ask_herdr.outcome.v1"
 OUTCOME_SCHEMA_PATH = SOURCE_ROOT / "schemas" / "ask_herdr.outcome.v1.schema.json"
 PUBLIC_BETA_ACTIVE = True
-PUBLIC_BETA_CLI_VERSION = "0.3.0"
-PUBLIC_BETA_IMPLEMENTATION_VERSION = "0.3.0"
+PUBLIC_BETA_CLI_VERSION = "0.4.0"
+PUBLIC_BETA_IMPLEMENTATION_VERSION = "0.4.0"
 DESCRIBE_V2_SCHEMA_ID = "ask_herdr.describe.v2"
 DESCRIBE_V2_SCHEMA_PATH = SOURCE_ROOT / "schemas" / "ask_herdr.describe.v2.schema.json"
 OUTCOME_V2_SCHEMA_ID = "ask_herdr.outcome.v2"
@@ -63,9 +69,11 @@ SCHEMA_REGISTRY = {
 PUBLIC_BETA_SCHEMA_REGISTRY = {
     **SCHEMA_REGISTRY,
     DESCRIBE_V2_SCHEMA_ID: (DESCRIBE_V2_SCHEMA_PATH, "2.0.0"),
+    DESCRIBE_V3_SCHEMA_ID: (DESCRIBE_V3_SCHEMA_PATH, "3.0.0"),
     OUTCOME_V2_SCHEMA_ID: (OUTCOME_V2_SCHEMA_PATH, "2.0.0"),
     QUERY_STATUS_RESULT_SCHEMA_ID: (QUERY_STATUS_RESULT_SCHEMA_PATH, "1.0.0"),
     SCHEMA_DOCUMENT_V2_SCHEMA_ID: (SCHEMA_DOCUMENT_V2_SCHEMA_PATH, "2.0.0"),
+    SCHEMA_DOCUMENT_V3_SCHEMA_ID: (SCHEMA_DOCUMENT_V3_SCHEMA_PATH, "3.0.0"),
 }
 
 OPERATIONS = sorted(
@@ -378,6 +386,8 @@ def validate_request_source(
         request = parse_captured_request(payload)
     except RequestCaptureError as error:
         return None, error.code, 64
+    from ask_herdr_machine_validate import validate_request
+
     try:
         outcome, exit_class = validate_request(request, payload)
     except TrustedHeaderError as error:
@@ -475,8 +485,10 @@ def static_profiles() -> List[Dict[str, Any]]:
 
 def describe(activation: Optional[bool] = None) -> Dict[str, Any]:
     active = public_beta_active(activation)
+    platform = runtime_platform()
+    execution_supported = platform["execution_tier"] == "full"
     return {
-        "schema": DESCRIBE_V2_SCHEMA_ID if active else DESCRIBE_SCHEMA_ID,
+        "schema": DESCRIBE_V3_SCHEMA_ID if active else DESCRIBE_SCHEMA_ID,
         "cli_version": PUBLIC_BETA_CLI_VERSION if active else CLI_VERSION,
         "machine_core_contract": {
             "implementation_version": (
@@ -534,12 +546,13 @@ def describe(activation: Optional[bool] = None) -> Dict[str, Any]:
             "version": "ask_herdr.launcher_profiles.v1",
             "profiles": static_profiles(),
         },
+        **({"runtime_platform": platform} if active else {}),
         "features": {
             "human_facade": False,
             "machine_describe": True,
-            "machine_run": active,
+            "machine_run": active and execution_supported,
             "machine_schema": True,
-            "machine_validate": True,
+            "machine_validate": execution_supported,
         },
     }
 
@@ -555,12 +568,17 @@ def schema_document(
     active = public_beta_active(activation)
     path, semantic_version = schema_registry(active)[schema_id]
     document = load_schema(path)
+    if active and schema_id in {
+        DESCRIBE_V3_SCHEMA_ID,
+        SCHEMA_DOCUMENT_V3_SCHEMA_ID,
+    }:
+        envelope_schema = SCHEMA_DOCUMENT_V3_SCHEMA_ID
+    elif active and schema_id not in SCHEMA_REGISTRY:
+        envelope_schema = SCHEMA_DOCUMENT_V2_SCHEMA_ID
+    else:
+        envelope_schema = SCHEMA_DOCUMENT_SCHEMA_ID
     return {
-        "schema": (
-            SCHEMA_DOCUMENT_V2_SCHEMA_ID
-            if active and schema_id not in SCHEMA_REGISTRY
-            else SCHEMA_DOCUMENT_SCHEMA_ID
-        ),
+        "schema": envelope_schema,
         "schema_id": schema_id,
         "semantic_version": semantic_version,
         "sha256": schema_digest(document),
@@ -582,6 +600,12 @@ def main(argv: List[str], *, activation: Optional[bool] = None) -> int:
             emit_json(schema_document(schema_id, active))
             return 0
         if len(argv) == 4 and argv[:3] == ["machine", "validate", "--request"]:
+            if not runtime_execution_supported():
+                print(
+                    "ask-herdr machine validate failed: runtime.platform_unsupported",
+                    file=sys.stderr,
+                )
+                return 20
             outcome, diagnostic_code, exit_class = validate_request_source(argv[3])
             if outcome is not None:
                 emit_json(outcome)
@@ -589,6 +613,12 @@ def main(argv: List[str], *, activation: Optional[bool] = None) -> int:
             print(f"ask-herdr machine validate failed: {diagnostic_code}", file=sys.stderr)
             return exit_class
         if active and len(argv) == 4 and argv[:3] == ["machine", "run", "--request"]:
+            if not runtime_execution_supported():
+                print(
+                    "ask-herdr machine run failed: runtime.platform_unsupported",
+                    file=sys.stderr,
+                )
+                return 20
             outcome, diagnostic_code, exit_class = run_query_status_source(argv[3])
             if outcome is not None:
                 emit_json(outcome)

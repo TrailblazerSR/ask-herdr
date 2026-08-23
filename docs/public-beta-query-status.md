@@ -18,6 +18,13 @@ Only `observation.mode=immediate` and `advisory=none` execute a metadata read.
 Wait observation and summary/full advisory requests return typed unavailable
 outcomes without inspecting the Project.
 
+Discovery schema `ask_herdr.describe.v3` reports a closed `runtime_platform`
+object and host-specific feature flags. macOS and Linux report the full tier;
+WSL follows Linux; native Windows and unrecognized hosts report contract-only
+tiers. Static discovery and schema retrieval remain available on every tier.
+The v1 and v2 discovery documents remain byte-stable compatibility surfaces;
+the two v3 discovery schemas are additive.
+
 ## Public outcome envelope
 
 Machine Run emits `ask_herdr.outcome.v2`. Its closed members are:
@@ -113,9 +120,18 @@ Herdr session state.
 
 ## Platform and compatibility
 
-This source preview supports macOS and Python 3.10 or later. Its durable-store
-read closure contains Darwin-specific filesystem primitives. Other operating
-systems are unsupported, even if static schema files can be read there.
+This source preview requires Python 3.10 or later. It supports the full local
+read closure on macOS and Linux, with WSL using the Linux/POSIX profile. Darwin
+uses its exclusive-create and full-sync adapter; Linux uses an atomic
+no-replace commit and directory synchronization. Both fail closed when their
+required filesystem guarantees are unavailable.
+
+The frozen request-v1 Project identity and durable-store contract is POSIX.
+Native Windows therefore supports discovery and schema retrieval only; Machine
+Validation and Machine Run stop before reading a Project with
+`runtime.platform_unsupported`. A future native-Windows execution surface
+requires a separately versioned path, ACL, and store protocol. See
+[platform support](platform-support.md) for exact profiles and launch forms.
 
 Direct Herdr work is outside this route. For a new or unknown Herdr command,
 follow `skills/herdr-command-authority/SKILL.md`, the installed release-matched

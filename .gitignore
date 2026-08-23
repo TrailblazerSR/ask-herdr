@@ -5,3 +5,12 @@
 __pycache__/
 *.py[cod]
 htmlcov/
+
+# Private Project state and fail-closed durability/bootstrap capsules.
+.ask-herdr/
+.ask-herdr-lane-index/
+.ask-herdr-lanes/
+.ask-herdr-topology/
+.ask-herdr-evidence/
+.ask-herdr-recovery-results/
+.ask-herdr-*.tmp/

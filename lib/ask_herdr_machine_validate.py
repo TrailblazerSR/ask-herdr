@@ -14,7 +14,6 @@ from datetime import datetime, timezone
 import errno
 import hashlib
 import os
-import re
 import stat
 from typing import Any, Dict, Iterator, Mapping, Optional, Sequence, Tuple
 
@@ -28,18 +27,16 @@ from ask_herdr_machine_semantics import (
     SemanticValidationError,
     compile_project_init_request,
 )
-from ask_herdr_operation_contract import OPERATION_CONTRACTS
 from ask_herdr_outcome_contract import (
     OUTCOME_MAP,
     OUTCOME_SCHEMA_ID,
     build_validation_outcome_schema,
 )
-from ask_herdr_request_schema import (
-    CANONICAL_ABSOLUTE_PATH_PATTERN,
-    REQUEST_SCHEMA_ID,
-    UUID4_PATTERN,
-    build_request_schema,
+from ask_herdr_request_header import (
+    TrustedHeaderError,
+    trust_request_header,
 )
+from ask_herdr_request_schema import build_request_schema
 from ask_herdr_project_mutation_lease import (
     ValidatedProjectMutationBinding,
 )
@@ -51,14 +48,7 @@ from ask_herdr_schema_validator import SchemaViolation, validate
 
 
 VALIDATION_RESULT_SCHEMA_ID = "ask_herdr.validation_result.v1"
-PROJECT_BINDING_SCHEMA_ID = "ask_herdr.project_binding.v1"
 RETRY_SCHEMA_ID = "ask_herdr.retry.v1"
-
-
-class TrustedHeaderError(ValueError):
-    """The input cannot safely identify an outcome envelope."""
-
-    code = "request.header_invalid"
 
 
 @dataclass(frozen=True)
@@ -91,51 +81,6 @@ class _ProjectInspectionError(ValueError):
 
 class _ProjectPathChangedError(OSError):
     """The descriptor walk no longer matches the caller-visible path."""
-
-
-def _is_uuid4(value: Any) -> bool:
-    return type(value) is str and re.fullmatch(UUID4_PATTERN, value) is not None
-
-
-def _is_canonical_absolute_path(value: Any) -> bool:
-    return (
-        type(value) is str
-        and 1 <= len(value) <= 4096
-        and re.fullmatch(CANONICAL_ABSOLUTE_PATH_PATTERN, value) is not None
-        and os.path.normpath(value) == value
-    )
-
-
-def trust_request_header(request: Mapping[str, Any]) -> None:
-    """Require the four exact values needed to build a safe outcome envelope."""
-
-    if request.get("schema") != REQUEST_SCHEMA_ID:
-        raise TrustedHeaderError(TrustedHeaderError.code)
-    operation = request.get("operation")
-    if type(operation) is not str or operation not in OPERATION_CONTRACTS:
-        raise TrustedHeaderError(TrustedHeaderError.code)
-    if not _is_uuid4(request.get("operation_id")):
-        raise TrustedHeaderError(TrustedHeaderError.code)
-    project = request.get("project")
-    if type(project) is not dict or set(project) != {
-        "schema",
-        "binding",
-        "root",
-        "authority_id",
-    }:
-        raise TrustedHeaderError(TrustedHeaderError.code)
-    if project.get("schema") != PROJECT_BINDING_SCHEMA_ID:
-        raise TrustedHeaderError(TrustedHeaderError.code)
-    binding = project.get("binding")
-    if binding not in {"bound", "candidate"}:
-        raise TrustedHeaderError(TrustedHeaderError.code)
-    if not _is_canonical_absolute_path(project.get("root")):
-        raise TrustedHeaderError(TrustedHeaderError.code)
-    authority_id = project.get("authority_id")
-    if (binding == "candidate" and authority_id is not None) or (
-        binding == "bound" and not _is_uuid4(authority_id)
-    ):
-        raise TrustedHeaderError(TrustedHeaderError.code)
 
 
 def _descriptor_identity(metadata: os.stat_result) -> Tuple[int, int, int, int, int]:

@@ -8,9 +8,9 @@ from typing import Any, Callable, Dict, Mapping, Optional
 
 from ask_herdr_authority_store import inspect_authority_store
 from ask_herdr_json import canonical_json
-from ask_herdr_machine_validate import (
+from ask_herdr_machine_validate import inspect_candidate_project_root
+from ask_herdr_request_header import (
     TrustedHeaderError,
-    inspect_candidate_project_root,
     trust_request_header,
 )
 from ask_herdr_outcome_v2_contract import OUTCOME_MAP, OUTCOME_SCHEMA_ID, RESULT_SCHEMA_ID
