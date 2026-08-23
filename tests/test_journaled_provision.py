@@ -139,7 +139,6 @@ class JournaledProvisionTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory(
             prefix="ask-herdr-journaled-provision-",
-            dir="/private/tmp",
         )
         self.root = Path(self.temporary.name).resolve()
         os.chmod(self.root, 0o700)
@@ -321,7 +320,6 @@ class JournaledProvisionTest(unittest.TestCase):
         ):
             with self.subTest(source=source, value=value), tempfile.TemporaryDirectory(
                 prefix="ask-herdr-start-running-",
-                dir="/private/tmp",
             ) as temporary:
                 root = Path(temporary).resolve()
                 os.chmod(root, 0o700)

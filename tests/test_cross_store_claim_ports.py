@@ -208,7 +208,6 @@ def _fixture(
 ) -> _Fixture:
     temporary = tempfile.TemporaryDirectory(
         prefix="ask-herdr-cross-store-red-",
-        dir="/private/tmp",
     )
     root = Path(temporary.name).resolve()
     os.chmod(root, 0o700)
