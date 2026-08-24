@@ -1,0 +1,7 @@
+/bin/* text eol=lf
+/lib/*.py text eol=lf
+/schemas/*.json text eol=lf
+/scripts/*.py text eol=lf
+/tests/*.py text eol=lf
+/.github/workflows/*.yml text eol=lf
+*.md text eol=lf

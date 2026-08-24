@@ -17,22 +17,35 @@ Repository access alone is insufficient for a successful status observation.
 
 ## Prepare the checkout
 
-This developer preview supports macOS and Python 3.10 or later. Resolve the
-exact `python3` executable before using the env-shebang launcher and follow any
-more specific host policy. Do not install software or change shell or global
-configuration merely to make an ambiguous interpreter resolve.
+This developer preview requires Python 3.10 or later. macOS and Linux provide
+the full local route, WSL follows the Linux/POSIX profile, and native Windows
+provides static contract discovery and schema retrieval only. Read the
+[platform-support matrix](platform-support.md), resolve the exact approved
+Python executable, and follow any more specific host policy. Do not install
+software or change shell or global configuration merely to make an ambiguous
+interpreter resolve.
 
 From the repository root, inspect the active contract:
 
+POSIX shell (replace the interpreter path):
+
 ```text
-bin/ask-herdr machine describe --json
+/absolute/path/to/python3 bin/ask-herdr machine describe --json
 ```
 
-Read `features`, `schema_documents`, and `exit_classes`. Retrieve the exact
-request and outcome schemas advertised by that same response:
+PowerShell (replace the interpreter path):
 
 ```text
-bin/ask-herdr machine schema --id EXACT_ADVERTISED_ID
+& 'C:\Path\To\python.exe' 'bin/ask-herdr' machine describe --json
+```
+
+Read `runtime_platform`, `features`, `schema_documents`, and `exit_classes`.
+Continue to validation or Machine Run only when discovery reports
+`execution_tier=full` and the corresponding feature as active. Retrieve the
+exact request and outcome schemas advertised by that same response:
+
+```text
+/absolute/path/to/python3 bin/ask-herdr machine schema --id EXACT_ADVERTISED_ID
 ```
 
 Do not copy stale schema IDs or selector fields from another checkout.
@@ -89,16 +102,18 @@ lowercase UUIDv4 for every `operation_id`.
 }
 ```
 
-Protect the file with mode `0600`. Do not paste it or the output of
-`machine validate` into an issue, chat, or provider prompt; validation output
-may contain the private Project root.
+On macOS, Linux, or WSL, protect the file with mode `0600`. This is a POSIX
+control, not a native-Windows ACL recipe. Do not paste the request or the
+output of `machine validate` into an issue, chat, or provider prompt;
+validation output may contain the private Project root. Native Windows
+validation and Machine Run are held in this release.
 
 ## Run the status read
 
 Use the canonical absolute request path:
 
 ```text
-bin/ask-herdr machine run --request /canonical/absolute/private-request.json
+/absolute/path/to/python3 bin/ask-herdr machine run --request /canonical/absolute/private-request.json
 ```
 
 Agent-mediated execution must use a file path, not stdin. After capture,
@@ -124,6 +139,9 @@ automatically.
 - Only `observation.mode=immediate` with `advisory=none` performs a read.
 - Project, Lane, Consultant Key, and operation UUID selectors are supported;
   retrieve their exact forms from the advertised request schema.
+- Full local execution is supported on macOS and Linux; WSL uses its Linux
+  profile. Native Windows is contract-only until a versioned Windows path,
+  ACL, and Project-store contract exists.
 - There is no Project-binding/bootstrap workflow, installed package, hosted
   service, human facade, provider-backed operation, deployment, or remote
   execution surface.

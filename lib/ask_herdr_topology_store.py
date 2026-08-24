@@ -32,7 +32,7 @@ from typing import (
     Tuple,
 )
 
-from ask_herdr_darwin_capsule import (
+from ask_herdr_capsule import (
     CommitDisposition,
     commit_exclusive,
     fullsync_file,

@@ -1,4 +1,4 @@
-name: ci
+name: CI
 
 on:
   push:
@@ -8,20 +8,68 @@ on:
 permissions:
   contents: read
 
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+
 jobs:
-  test:
-    runs-on: macos-14
+  portable-core:
+    name: Core (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-    env:
-      PYTHONDONTWRITEBYTECODE: "1"
+        os: [macos-14, ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.14"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
-      - run: python -m pip install -r requirements-dev.txt
-      - run: python -m unittest discover -v -s tests
-      - run: python bin/ask-herdr machine describe --json
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
+      - name: Verify portable contract surface
+        run: >-
+          python -m unittest -v
+          tests.test_platform_portability
+          tests.test_validation_discovery_activation
+          tests.test_agent_onboarding
+
+  darwin-full-suite:
+    name: Darwin full suite (Python 3.14)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
+      - name: Verify generated schemas
+        run: python -m scripts.build_contract_schemas --check
+      - name: Run full suite
+        run: python -W error::ResourceWarning -m unittest discover -s tests -p "test_*.py"
+
+  linux-portability-and-stores:
+    name: Linux portability and stores (Python 3.14)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - name: Install test dependency
+        run: python -m pip install --disable-pip-version-check -r requirements-dev.txt
+      - name: Verify generated schemas
+        run: python -m scripts.build_contract_schemas --check
+      - name: Run Linux portability and store subset
+        run: >-
+          python -W error::ResourceWarning -m unittest -v
+          tests.test_platform_portability
+          tests.test_contract_discovery
+          tests.test_validation_discovery_activation
+          tests.test_machine_run_status_v2
+          tests.test_journaled_provision
+          tests.test_cross_store_claim_ports
+          tests.test_project_read_epoch
+          tests.test_project_status
+          tests.test_operation_status

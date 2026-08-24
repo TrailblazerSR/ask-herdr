@@ -261,19 +261,16 @@ class MachineRunStatusV2Test(unittest.TestCase):
             check=False,
         )
 
-    def test_default_discovery_activates_v2_while_legacy_schema_and_validate_remain_v1(self):
+    def test_default_discovery_activates_v3_while_legacy_schema_and_validate_remain_v1(self):
         completed = self.invoke_subprocess("machine", "describe", "--json")
         self.assertEqual(completed.returncode, 0, completed.stderr)
-        self.assertEqual(
-            hashlib.sha256(completed.stdout).hexdigest(),
-            "3338dca996965ad04b8dbd05185ea55c140d0123ffd46026d14ae201d40a6a94",
-        )
+        self.assertEqual(completed.stdout.count(b"\n"), 1)
         description = json.loads(completed.stdout)
-        self.assertEqual(description["schema"], "ask_herdr.describe.v2")
-        self.assertEqual(description["cli_version"], "0.3.0")
+        self.assertEqual(description["schema"], "ask_herdr.describe.v3")
+        self.assertEqual(description["cli_version"], "0.4.0")
         self.assertEqual(
             description["machine_core_contract"]["implementation_version"],
-            "0.3.0",
+            "0.4.0",
         )
         self.assertEqual(
             description["machine_core_contract"]["supported_outcome_versions"],
@@ -286,12 +283,14 @@ class MachineRunStatusV2Test(unittest.TestCase):
             [
                 "ask_herdr.describe.v1",
                 "ask_herdr.describe.v2",
+                "ask_herdr.describe.v3",
                 "ask_herdr.outcome.v1",
                 "ask_herdr.outcome.v2",
                 "ask_herdr.query.status.result.v1",
                 "ask_herdr.request.v1",
                 "ask_herdr.schema_document.v1",
                 "ask_herdr.schema_document.v2",
+                "ask_herdr.schema_document.v3",
             ],
         )
 
@@ -391,14 +390,14 @@ class MachineRunStatusV2Test(unittest.TestCase):
             self.assertNotIn(str(project), completed.stdout.decode("utf-8"))
             self.assertFalse(provider_log.exists())
 
-    def test_injected_true_discovery_registers_both_v2_documents_and_exact_route(self):
+    def test_injected_true_discovery_registers_v2_v3_documents_and_exact_route(self):
         module = _cli_module()
         description = _activation_call(module.describe, activation=True)
-        self.assertEqual(description["schema"], "ask_herdr.describe.v2")
-        self.assertEqual(description["cli_version"], "0.3.0")
+        self.assertEqual(description["schema"], "ask_herdr.describe.v3")
+        self.assertEqual(description["cli_version"], "0.4.0")
         self.assertEqual(
             description["machine_core_contract"]["implementation_version"],
-            "0.3.0",
+            "0.4.0",
         )
         self.assertTrue(description["features"]["machine_run"])
         self.assertEqual(
@@ -410,12 +409,14 @@ class MachineRunStatusV2Test(unittest.TestCase):
             [
                 "ask_herdr.describe.v1",
                 "ask_herdr.describe.v2",
+                "ask_herdr.describe.v3",
                 "ask_herdr.outcome.v1",
                 "ask_herdr.outcome.v2",
                 "ask_herdr.query.status.result.v1",
                 "ask_herdr.request.v1",
                 "ask_herdr.schema_document.v1",
                 "ask_herdr.schema_document.v2",
+                "ask_herdr.schema_document.v3",
             ],
         )
         for schema_id in (
@@ -449,25 +450,36 @@ class MachineRunStatusV2Test(unittest.TestCase):
                 self.assertEqual(new["schema"], "ask_herdr.schema_document.v2")
                 self.assertEqual(new["semantic_version"], version)
                 Draft202012Validator.check_schema(new["document"])
+        for schema_id in (
+            "ask_herdr.describe.v3",
+            "ask_herdr.schema_document.v3",
+        ):
+            with self.subTest(schema_id=schema_id):
+                new = _activation_call(
+                    module.schema_document, schema_id, activation=True
+                )
+                self.assertEqual(new["schema"], "ask_herdr.schema_document.v3")
+                self.assertEqual(new["semantic_version"], "3.0.0")
+                Draft202012Validator.check_schema(new["document"])
 
         describe_errors = list(
             Draft202012Validator(
                 _activation_call(
                     module.schema_document,
-                    "ask_herdr.describe.v2",
+                    "ask_herdr.describe.v3",
                     activation=True,
                 )["document"]
             ).iter_errors(description)
         )
         self.assertEqual(describe_errors, [])
-        schema_v2_wrapper = _activation_call(
+        schema_v3_wrapper = _activation_call(
             module.schema_document,
-            "ask_herdr.schema_document.v2",
+            "ask_herdr.schema_document.v3",
             activation=True,
         )
         wrapper_errors = list(
-            Draft202012Validator(schema_v2_wrapper["document"]).iter_errors(
-                schema_v2_wrapper
+            Draft202012Validator(schema_v3_wrapper["document"]).iter_errors(
+                schema_v3_wrapper
             )
         )
         self.assertEqual(wrapper_errors, [])
@@ -802,8 +814,8 @@ class MachineRunStatusV2Test(unittest.TestCase):
         description = json.loads(completed.stdout)
         self.assertTrue(description["features"]["machine_run"])
         self.assertFalse(description["features"]["human_facade"])
-        self.assertEqual(description["schema"], "ask_herdr.describe.v2")
-        self.assertEqual(description["cli_version"], "0.3.0")
+        self.assertEqual(description["schema"], "ask_herdr.describe.v3")
+        self.assertEqual(description["cli_version"], "0.4.0")
 
 
 if __name__ == "__main__":

@@ -12,36 +12,39 @@ but does not replace discovery.
 ## Establish the local boundary
 
 1. Work from the repository root containing `bin/ask-herdr`.
-2. Resolve the exact interpreter before invoking the env-shebang script:
-
-   ```text
-   command -v python3
-   ```
-
-   Verify the printed absolute executable reports Python 3.10 or later and
-   that the env shebang will resolve to the same executable. Follow any more
-   specific host or repository executable policy. If resolution is ambiguous,
-   stop and report it rather than installing software or changing shell or
-   global configuration.
-3. Read the [quick start](../../../docs/public-beta-getting-started.md)
+2. Read the [platform-support contract](../../../docs/platform-support.md),
+   identify the exact host profile, and select an approved Python interpreter.
+   Pass `bin/ask-herdr` to that interpreter explicitly; direct execution is a
+   POSIX convenience, not the portable launch contract. Apply any host-local
+   executable guard in `AGENTS.md`. If the interpreter cannot be resolved
+   without guessing or changing host configuration, stop and report it.
+3. Read the [source quick start](../../../docs/public-beta-getting-started.md)
    for access and privacy rules. Read the
    [full public contract](../../../docs/public-beta-query-status.md) when
    constructing or interpreting a request or outcome.
-4. Use only `bin/ask-herdr` for this repository's Machine interface. Do not
-   substitute a provider launcher, a Herdr command, or a similarly named tool.
+4. Use `bin/ask-herdr` for the Machine interface. The similarly named
+   `bin/ask-herdr-pipeline` is a legacy, stub-only Herdr prototype and is not
+   the `query.status` route.
 
 The boundary is established only when the repository, approved interpreter,
-and applicable public contract are identified.
+host profile, and applicable public contract are identified.
 
 ## Discover the current contract
 
-Run static discovery first:
+Run static discovery first. Substitute the exact approved interpreter path for
+the metavariable below; do not execute `APPROVED_PYTHON` literally:
 
 ```text
-bin/ask-herdr machine describe --json
+APPROVED_PYTHON bin/ask-herdr machine describe --json
 ```
 
-Read `features`, `schema_documents`, and `exit_classes` from that response.
+Read `runtime_platform`, `features`, `schema_documents`, and `exit_classes`
+from that response. Continue to validation or Machine Run only when discovery
+reports the full execution tier and the corresponding feature as active.
+Native Windows is currently contract-only: discovery and schema retrieval are
+available, while validation and Machine Run are held pending a versioned
+Windows path, ACL, and store protocol.
+
 Treat `features.machine_run=false` as an unavailable execution surface. Treat
 launcher profiles as disabled registry metadata unless a separately
 authorized implementation explicitly proves otherwise.
@@ -50,7 +53,7 @@ Retrieve every request or outcome schema needed for the task by using the
 exact ID advertised in the same discovery response:
 
 ```text
-bin/ask-herdr machine schema --id EXACT_ADVERTISED_ID
+APPROVED_PYTHON bin/ask-herdr machine schema --id EXACT_ADVERTISED_ID
 ```
 
 Do not cache version numbers, schema IDs, selector fields, exit tables, or
@@ -60,12 +63,13 @@ retrieved from the same checkout.
 
 ## Preserve private Project binding
 
-A bound request contains private Project identity data. For an agent-mediated
-status read:
+A bound request contains private Project identity data. On a full POSIX host,
+for an agent-mediated status read:
 
-- Have the Project owner prepare the request file outside the repository,
-  protect it with mode `0600`, and provide only its canonical absolute file
-  path. The path must not contain a symlinked component.
+- Have the Project owner prepare the request file outside the repository and
+  provide only its canonical absolute file path. The path must not contain a
+  symlinked component. Protect it with mode `0600`; this is a POSIX control,
+  not a native-Windows ACL recipe.
 - Operate on that path without reading, printing, copying, logging, hashing, or
   embedding the request contents in agent/model context.
 - Use a file path, not `--request -`; stdin would place private request content
@@ -86,7 +90,7 @@ After discovery reports an active Machine Run surface, invoke only the
 owner-prepared private file:
 
 ```text
-bin/ask-herdr machine run --request /canonical/absolute/private-request.json
+APPROVED_PYTHON bin/ask-herdr machine run --request /canonical/absolute/private-request.json
 ```
 
 Interpret the process result as follows:

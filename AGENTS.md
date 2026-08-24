@@ -7,18 +7,25 @@ and follow `.agents/skills/ask-herdr/SKILL.md`.
 
 Treat the repository-local `bin/ask-herdr` executable and the exact schema
 documents advertised by `machine describe --json` as executable authority.
-The current developer preview is source-only, supports macOS with Python 3.10
-or later, and exposes no Project-binding or discovery workflow.
+The current developer preview is source-only and requires Python 3.10 or
+later. macOS and Linux provide the full local `query.status` path, WSL follows
+the Linux profile, and native Windows is limited to static contract discovery
+and schema retrieval. Read `docs/platform-support.md` and the discovered
+`runtime_platform` object before selecting a route. The preview exposes no
+Project-binding or discovery workflow.
 
 Keep a bound request's Project root, Authority UUID, and complete JSON outside
 agent/model context. Operate on an owner-prepared request by canonical absolute
 file path and interpret only the path-free Machine Run outcome. Launcher
 profiles in discovery are disabled metadata, not provider authority.
 
-Resolve the exact Python executable before invoking the env-shebang launcher
-and verify that it is Python 3.10 or later. Follow any more specific host or
-repository executable policy. If resolution is ambiguous, stop rather than
-installing software or changing shell or global configuration.
+Resolve and approve the exact Python executable, verify that it is Python 3.10
+or later, and pass `bin/ask-herdr` to it as a script argument. Direct execution
+through the env shebang is a POSIX convenience, not the cross-platform launch
+contract. Follow any more specific host or repository executable policy. If
+resolution is ambiguous, stop rather than installing software or changing
+shell or global configuration. Do not attempt Machine Validation or Machine
+Run when discovery reports that feature inactive.
 
 ## Herdr command authority
 

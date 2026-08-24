@@ -98,7 +98,6 @@ class _Fixture:
     def __init__(self, api: Any) -> None:
         self.temporary = tempfile.TemporaryDirectory(
             prefix="ask-herdr-human-first-lane-",
-            dir="/private/tmp",
         )
         self.root = Path(self.temporary.name).resolve()
         os.chmod(self.root, 0o700)
@@ -511,7 +510,6 @@ class HumanFirstLaneCoordinatorTest(unittest.TestCase):
         api = _api()
         temporary = tempfile.TemporaryDirectory(
             prefix="ask-herdr-forged-prepared-continuation-",
-            dir="/private/tmp",
         )
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name).resolve()

@@ -9,26 +9,41 @@ discover Project bindings.
 
 ## Requirements
 
-- macOS;
-- Python 3.10 or later; and
+- Python 3.10 or later;
+- macOS or Linux for the full provider-free `query.status` path (WSL follows
+  the Linux/POSIX contract); and
 - for a real status read, an already-bound Project root and matching Authority
   UUID supplied privately by that Project's owner.
+
+Native Windows supports contract discovery and bundled schema retrieval in
+this release. Machine Validation and Machine Run remain held there until a
+versioned Windows path, ACL, and Project-store protocol exists. See the
+[platform-support matrix](docs/platform-support.md) for exact host profiles and
+launch forms.
 
 The runtime uses only the Python standard library. Development tests also use
 `jsonschema`; see `requirements-dev.txt`.
 
 ## Discover the executable contract
 
-From the repository root, start with runtime discovery:
+From the repository root, pass `bin/ask-herdr` to an approved Python
+interpreter. On a POSIX shell:
 
 ```text
-bin/ask-herdr machine describe --json
+python3 bin/ask-herdr machine describe --json
 ```
 
-Use the exact schema IDs advertised by that response:
+On PowerShell:
 
 ```text
-bin/ask-herdr machine schema --id EXACT_ADVERTISED_ID
+& 'C:\Path\To\python.exe' 'bin/ask-herdr' machine describe --json
+```
+
+Read `runtime_platform` and `features`, then use the exact schema IDs
+advertised by that same response:
+
+```text
+python3 bin/ask-herdr machine schema --id EXACT_ADVERTISED_ID
 ```
 
 The executable and its advertised schemas are authoritative. Documentation
@@ -61,6 +76,8 @@ Herdr command. `query.status` itself does not use Herdr.
 
 - Only `query.status` is executable through Machine Run.
 - Only immediate, metadata-only observation with `advisory=none` executes.
+- macOS and Linux provide native Machine Validation and `query.status`; WSL
+  uses the Linux profile; native Windows is contract-only.
 - There is no public Project bootstrap, package release, human facade, hosted
   service, provider-backed operation, deployment, or compatibility promise.
 - A synthetic unbound Project normally returns a typed reconciliation or
@@ -69,13 +86,21 @@ Herdr command. `query.status` itself does not use Herdr.
 ## Development
 
 Create an isolated environment, install the test dependency, and run the
-included suite:
+included suite. On a POSIX shell:
 
 ```text
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements-dev.txt
 python -m unittest discover -v -s tests
+```
+
+On PowerShell:
+
+```text
+& 'C:\Path\To\python.exe' -m venv .venv
+& '.\.venv\Scripts\python.exe' -m pip install -r requirements-dev.txt
+& '.\.venv\Scripts\python.exe' -m unittest discover -v -s tests
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and

@@ -11,31 +11,39 @@ Do not treat repository examples or remembered syntax as executable authority.
 ## Establish the local runtime contract
 
 Keep each host separate. On the exact host where a command would run, identify
-the installed binary and collect only read-only authority evidence:
+the installed binary with the host-native resolver:
 
 ```bash
 command -v herdr
-herdr --version
-herdr --skill
-herdr --help
-herdr api schema --json
 ```
+
+```powershell
+(Get-Command herdr -ErrorAction Stop).Source
+```
+
+Retain the resolved absolute path, then use that exact executable to collect
+only read-only authority evidence: `--version`, `--skill`, `--help`, and
+`api schema --json`. Do not switch back to an unresolved command name after
+resolution.
 
 The installed `herdr --skill` output is the release-matched operating guide.
 The installed schema is the socket-contract authority. Do not replace either
 with syntax copied from a different release.
 
-For a known command, also inspect the relevant installed command group. Run the
-group without a nested subcommand, for example `herdr pane` or `herdr agent`.
-Do not run bare `herdr`, because it launches or attaches the TUI. Do not probe a
-mutating nested command by omitting arguments; some create commands are valid
-with defaults and will execute.
+For a known command, also inspect the relevant installed command group through
+the same resolved binary, for example the `pane` or `agent` group. Do not run
+the binary without arguments, because it launches or attaches the TUI. Do not
+probe a mutating nested command by omitting arguments; some create commands are
+valid with defaults and will execute.
 
 ## Resolve an unknown or new command
 
 When a required capability is absent, unfamiliar, or differs from repository
 history, read `references/official-sources.md` completely and consult the
-latest relevant page on the official Herdr site.
+latest relevant page on the official Herdr site. For a Windows host, also read
+the current [official Windows support page](https://herdr.dev/docs/windows-beta/)
+before assuming a Unix-only session, handoff, remote-target, or clipboard
+behavior exists.
 
 Then reconcile the web documentation with all of these local facts:
 
@@ -54,25 +62,33 @@ Preview documentation is capability discovery only unless the installed binary
 is itself a preview build. Stable documentation does not override an older
 installed release.
 
-## Apply the Ask-Herdr boundary
+## Apply the project runtime pin
 
-The public `query.status` route does not invoke Herdr and must not acquire a
-Herdr dependency merely because direct Herdr syntax has been verified. If a
-future Ask-Herdr capability introduces a Herdr command, treat its installed
-version, schema version, protocol, exact argv, and nonmutation or isolated-test
-boundary as a reviewed contract. A version change requires corresponding fake,
-schema, and focused regression updates before any live mutation.
+The legacy `bin/ask-herdr-pipeline` runner owns an exact reviewed Herdr version,
+schema version, and protocol in its preflight constants. Read those constants;
+do not duplicate their current numeric values in this skill. A version change
+is a contract change and requires, before any live mutation:
 
-Command verification never activates a Machine Run operation, provider call,
-or external effect.
+- an updated version pin;
+- an updated fake and focused preflight regression;
+- validation of every constructed Herdr command against the new installed
+  release skill and schema; and
+- a fresh provider-free smoke in an isolated named test session.
+
+Do not activate a public Machine Run, provider call, or external effect merely
+because command syntax has been verified.
 
 ## Respect the live-control boundary
 
 For an agent directly inspecting or controlling a Herdr-managed session, first
-require:
+require `HERDR_ENV=1` through the host-native environment:
 
 ```bash
 test "${HERDR_ENV:-}" = 1
+```
+
+```powershell
+if ($env:HERDR_ENV -ne '1') { throw 'HERDR_ENV is not active' }
 ```
 
 If `HERDR_ENV=1` is absent, do not inspect or control the focused live session.

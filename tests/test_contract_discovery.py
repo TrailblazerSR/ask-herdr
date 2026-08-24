@@ -10,6 +10,9 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "bin" / "ask-herdr"
+sys.path.insert(0, str(ROOT / "lib"))
+
+from ask_herdr_platform import runtime_platform  # noqa: E402
 
 EXPECTED_OPERATIONS = sorted(
     [
@@ -112,11 +115,11 @@ class ContractDiscoveryTest(unittest.TestCase):
             self.assertEqual(completed.stderr, "")
             self.assertEqual(completed.stdout.count("\n"), 1)
             result = json.loads(completed.stdout)
-            self.assertEqual(result["schema"], "ask_herdr.describe.v2")
-            self.assertEqual(result["cli_version"], "0.3.0")
+            self.assertEqual(result["schema"], "ask_herdr.describe.v3")
+            self.assertEqual(result["cli_version"], "0.4.0")
             self.assertEqual(
                 result["machine_core_contract"]["implementation_version"],
-                "0.3.0",
+                "0.4.0",
             )
             self.assertEqual(
                 result["machine_core_contract"]["supported_request_versions"],
@@ -205,17 +208,20 @@ class ContractDiscoveryTest(unittest.TestCase):
             self.assertTrue(result["features"]["machine_validate"])
             self.assertTrue(result["features"]["machine_run"])
             self.assertFalse(result["features"]["human_facade"])
+            self.assertEqual(result["runtime_platform"], runtime_platform())
             self.assertEqual(
                 [item["schema_id"] for item in result["schema_documents"]],
                 [
                     "ask_herdr.describe.v1",
                     "ask_herdr.describe.v2",
+                    "ask_herdr.describe.v3",
                     "ask_herdr.outcome.v1",
                     "ask_herdr.outcome.v2",
                     "ask_herdr.query.status.result.v1",
                     "ask_herdr.request.v1",
                     "ask_herdr.schema_document.v1",
                     "ask_herdr.schema_document.v2",
+                    "ask_herdr.schema_document.v3",
                 ],
             )
             for schema_document in result["schema_documents"]:

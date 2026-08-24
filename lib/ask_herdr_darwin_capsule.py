@@ -8,12 +8,13 @@ from __future__ import annotations
 
 import ctypes
 import errno
-from enum import Enum
 import fcntl
 import os
 import re
 import stat
 from typing import NoReturn
+
+from ask_herdr_capsule_contract import CommitDisposition
 
 
 ATTR_BIT_MAP_COUNT = 5
@@ -26,13 +27,6 @@ RENAME_EXCL = 0x00000004
 RENAME_NOFOLLOW_ANY = 0x00000010
 _COMMIT_FLAGS = RENAME_EXCL | RENAME_NOFOLLOW_ANY
 _BASENAME = re.compile(r"[A-Za-z0-9._-]{1,255}")
-
-
-class CommitDisposition(str, Enum):
-    """The only non-error outcomes of an exclusive capsule commit."""
-
-    COMMITTED = "committed"
-    OCCUPIED = "occupied"
 
 
 class _AttrList(ctypes.Structure):

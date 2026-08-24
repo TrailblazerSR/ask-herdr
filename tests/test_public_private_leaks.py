@@ -140,6 +140,22 @@ def _request(root="/private/secret/PROJECT_ROOT_CANARY"):
 
 
 class PublicPrivateLeakTest(unittest.TestCase):
+    def test_private_project_state_names_are_ignored(self):
+        ignored = set(
+            (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+        )
+        self.assertTrue(
+            {
+                ".ask-herdr/",
+                ".ask-herdr-lane-index/",
+                ".ask-herdr-lanes/",
+                ".ask-herdr-topology/",
+                ".ask-herdr-evidence/",
+                ".ask-herdr-recovery-results/",
+                ".ask-herdr-*.tmp/",
+            }.issubset(ignored)
+        )
+
     def test_existing_frozen_private_projection_dataclass_shapes_are_unchanged(self):
         self.assertEqual(
             [field.name for field in fields(ProjectStatusLaneHead)],

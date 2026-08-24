@@ -71,14 +71,16 @@ class AgentOnboardingTest(unittest.TestCase):
         skill = CANONICAL_SKILL.read_text(encoding="utf-8")
 
         for required_interface in (
-            "bin/ask-herdr machine describe --json",
-            "bin/ask-herdr machine schema --id EXACT_ADVERTISED_ID",
-            "bin/ask-herdr machine run --request",
+            "APPROVED_PYTHON bin/ask-herdr machine describe --json",
+            "APPROVED_PYTHON bin/ask-herdr machine schema --id EXACT_ADVERTISED_ID",
+            "APPROVED_PYTHON bin/ask-herdr machine run --request",
             "features.machine_run=false",
+            "runtime_platform",
+            "Native Windows is currently contract-only",
             "schema_documents",
             "exit_classes",
-            "command -v python3",
-            "Python 3.10 or later",
+            "do not execute `APPROVED_PYTHON` literally",
+            "Pass `bin/ask-herdr` to that interpreter explicitly",
         ):
             self.assertIn(required_interface, skill)
 
@@ -91,10 +93,13 @@ class AgentOnboardingTest(unittest.TestCase):
         ):
             self.assertIn(privacy_invariant, skill)
 
-        self.assertIn("provider launcher", skill)
+        self.assertIn("bin/ask-herdr-pipeline", skill)
         self.assertIn("Herdr command-authority skill", skill)
         self.assertNotIn("cli_version=", skill)
         self.assertNotIn("ask_herdr.describe.v2", skill)
+        self.assertNotIn("ask_herdr.describe.v3", skill)
+        self.assertNotIn("/usr/local/bin/python3", skill)
+        self.assertNotIn("/opt/homebrew/bin/git", skill)
         self.assertNotIn("/usr/bin/python3", skill)
         self.assertNotIn("/usr/bin/git", skill)
 
@@ -130,10 +135,18 @@ class AgentOnboardingTest(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertEqual(completed.stderr, "")
         description = json.loads(completed.stdout)
-        self.assertTrue(description["features"]["machine_run"])
+        runtime = description["runtime_platform"]
+        execution_supported = runtime["execution_tier"] == "full"
+        self.assertEqual(
+            description["features"]["machine_run"],
+            execution_supported,
+        )
         self.assertFalse(description["features"]["human_facade"])
         self.assertTrue(description["features"]["machine_schema"])
-        self.assertTrue(description["features"]["machine_validate"])
+        self.assertEqual(
+            description["features"]["machine_validate"],
+            execution_supported,
+        )
 
         profiles = description["launcher_profile_registry"]["profiles"]
         self.assertGreater(len(profiles), 0)
@@ -144,6 +157,8 @@ class AgentOnboardingTest(unittest.TestCase):
         }
         self.assertIn("ask_herdr.request.v1", schema_ids)
         self.assertIn("ask_herdr.outcome.v2", schema_ids)
+        self.assertIn("ask_herdr.describe.v3", schema_ids)
+        self.assertIn("ask_herdr.schema_document.v3", schema_ids)
 
     def test_synthetic_private_file_flow_returns_one_path_free_typed_outcome(self):
         environment = dict(os.environ)
@@ -186,6 +201,23 @@ class AgentOnboardingTest(unittest.TestCase):
             request_path.write_text(json.dumps(request), encoding="utf-8")
             request_path.chmod(0o600)
 
+            discovered = subprocess.run(
+                [sys.executable, str(CLI), "machine", "describe", "--json"],
+                cwd=ROOT,
+                env=environment,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+            self.assertEqual(discovered.returncode, 0, discovered.stderr)
+            execution_supported = (
+                json.loads(discovered.stdout)["runtime_platform"][
+                    "execution_tier"
+                ]
+                == "full"
+            )
+
             validation = subprocess.run(
                 [
                     sys.executable,
@@ -202,11 +234,20 @@ class AgentOnboardingTest(unittest.TestCase):
                 stderr=subprocess.PIPE,
                 check=False,
             )
-            self.assertEqual(validation.returncode, 20, validation.stderr)
-            self.assertEqual(
-                json.loads(validation.stdout)["outcome_kind"],
-                "request_not_currently_admissible",
-            )
+            if execution_supported:
+                self.assertEqual(validation.returncode, 20, validation.stderr)
+                self.assertEqual(
+                    json.loads(validation.stdout)["outcome_kind"],
+                    "request_not_currently_admissible",
+                )
+            else:
+                self.assertEqual(validation.returncode, 20)
+                self.assertEqual(validation.stdout, "")
+                self.assertEqual(
+                    validation.stderr,
+                    "ask-herdr machine validate failed: "
+                    "runtime.platform_unsupported\n",
+                )
 
             run = subprocess.run(
                 [
@@ -224,6 +265,15 @@ class AgentOnboardingTest(unittest.TestCase):
                 stderr=subprocess.PIPE,
                 check=False,
             )
+            if not execution_supported:
+                self.assertEqual(run.returncode, 20)
+                self.assertEqual(run.stdout, "")
+                self.assertEqual(
+                    run.stderr,
+                    "ask-herdr machine run failed: "
+                    "runtime.platform_unsupported\n",
+                )
+                return
             self.assertEqual(run.returncode, 40, run.stderr)
             self.assertEqual(run.stderr, "")
             self.assertEqual(run.stdout.count("\n"), 1)
