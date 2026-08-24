@@ -62,21 +62,24 @@ Preview documentation is capability discovery only unless the installed binary
 is itself a preview build. Stable documentation does not override an older
 installed release.
 
-## Apply the project runtime pin
+## Keep direct integrations release-bound
 
-The legacy `bin/ask-herdr-pipeline` runner owns an exact reviewed Herdr version,
-schema version, and protocol in its preflight constants. Read those constants;
-do not duplicate their current numeric values in this skill. A version change
-is a contract change and requires, before any live mutation:
+`query.status` does not invoke Herdr, and this source preview does not ship a
+direct Herdr runner or establish a Herdr version, schema, or protocol pin. Any
+future direct integration must own an exact versioned contract. Before a live
+mutation, require:
 
-- an updated version pin;
-- an updated fake and focused preflight regression;
-- validation of every constructed Herdr command against the new installed
-  release skill and schema; and
-- a fresh provider-free smoke in an isolated named test session.
+- recorded evidence for the installed binary, version, release skill, schema,
+  and protocol;
+- validation of every constructed Herdr command against that installed
+  release skill and schema;
+- a focused fake regression for the preflight and command; and
+- a fresh provider-free smoke in an isolated named test session under explicit
+  authority.
 
-Do not activate a public Machine Run, provider call, or external effect merely
-because command syntax has been verified.
+Command verification does not activate another Ask-Herdr operation or
+authorize a provider call, live control, remote effect, or other external
+effect.
 
 ## Respect the live-control boundary
 

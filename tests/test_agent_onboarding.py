@@ -93,7 +93,7 @@ class AgentOnboardingTest(unittest.TestCase):
         ):
             self.assertIn(privacy_invariant, skill)
 
-        self.assertIn("bin/ask-herdr-pipeline", skill)
+        self.assertNotIn("bin/ask-herdr-pipeline", skill)
         self.assertIn("Herdr command-authority skill", skill)
         self.assertNotIn("cli_version=", skill)
         self.assertNotIn("ask_herdr.describe.v2", skill)
