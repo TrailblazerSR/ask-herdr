@@ -2,24 +2,17 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Dict, Mapping, Sequence, Tuple
+
+from ask_herdr_resources import schema_path
 
 
 JSON_SCHEMA_DRAFT = "https://json-schema.org/draft/2020-12/schema"
 OUTCOME_SCHEMA_ID = "ask_herdr.outcome.v2"
 RESULT_SCHEMA_ID = "ask_herdr.query.status.result.v1"
-OUTCOME_SCHEMA_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "schemas"
-    / "ask_herdr.outcome.v2.schema.json"
-)
-RESULT_SCHEMA_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "schemas"
-    / "ask_herdr.query.status.result.v1.schema.json"
-)
+OUTCOME_SCHEMA_PATH = schema_path("ask_herdr.outcome.v2.schema.json")
+RESULT_SCHEMA_PATH = schema_path("ask_herdr.query.status.result.v1.schema.json")
 
 UUID4_PATTERN = (
     r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-"

@@ -7,12 +7,14 @@ and follow `.agents/skills/ask-herdr/SKILL.md`.
 
 Treat the repository-local `bin/ask-herdr` executable and the exact schema
 documents advertised by `machine describe --json` as executable authority.
-The current developer preview is source-only and requires Python 3.10 or
-later. macOS and Linux provide the full local `query.status` path, WSL follows
-the Linux profile, and native Windows is limited to static contract discovery
-and schema retrieval. Read `docs/platform-support.md` and the discovered
-`runtime_platform` object before selecting a route. The preview exposes no
-Project-binding or discovery workflow.
+The current developer preview is Git-installable and requires Python 3.10 or
+later. Repository tasks still use the source wrapper so behavior and schemas
+are bound to the exact checkout under review. macOS and Linux provide the full
+local `query.status` path, WSL follows the Linux profile, and native Windows is
+limited to static contract discovery and schema retrieval. Read
+`docs/platform-support.md` and the discovered `runtime_platform` object before
+selecting a route. The preview exposes no Project-binding or discovery
+workflow.
 
 Keep a bound request's Project root, Authority UUID, and complete JSON outside
 agent/model context. Operate on an owner-prepared request by canonical absolute

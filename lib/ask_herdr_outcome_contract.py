@@ -8,18 +8,15 @@ family are activated atomically.
 
 from __future__ import annotations
 
-from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Dict, Mapping, Tuple
+
+from ask_herdr_resources import schema_path
 
 
 OUTCOME_MAP_SCHEMA_ID = "ask_herdr.outcome_map.v1"
 OUTCOME_SCHEMA_ID = "ask_herdr.outcome.v1"
-OUTCOME_SCHEMA_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "schemas"
-    / "ask_herdr.outcome.v1.schema.json"
-)
+OUTCOME_SCHEMA_PATH = schema_path("ask_herdr.outcome.v1.schema.json")
 
 
 _TICKET34_OUTCOME_MAP = {

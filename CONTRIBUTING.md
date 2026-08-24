@@ -1,6 +1,6 @@
 # Contributing
 
-Ask-Herdr is an experimental source-only developer preview. Keep changes
+Ask-Herdr is an experimental, Git-installable developer preview. Keep changes
 bounded to the documented local `query.status` contract unless a proposal
 explicitly introduces and justifies a new compatibility surface.
 
@@ -15,17 +15,20 @@ explicitly introduces and justifies a new compatibility surface.
 
 ## Test locally
 
-The supported development environment is macOS with Python 3.10 or later.
+Development requires Python 3.10 or later. The portable contract suite runs on
+macOS, Linux, and Windows; full storage behavior remains platform-gated as
+documented in [docs/platform-support.md](docs/platform-support.md).
 
 ```text
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements-dev.txt
+python -m pip install --no-deps -e .
 python -m unittest discover -v -s tests
 ```
 
-Run `bin/ask-herdr machine describe --json` and retrieve every schema affected
-by the change. Contract changes must update implementation, bundled schemas,
+Run `ask-herdr machine describe --json` and retrieve every schema affected by
+the change. Contract changes must update implementation, bundled schemas,
 tests, documentation, and agent instructions together. Preserve path-free
 outcomes and the no-provider/no-Herdr/no-network/no-mutation boundary.
 

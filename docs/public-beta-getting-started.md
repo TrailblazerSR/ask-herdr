@@ -15,7 +15,7 @@ owner:
 
 Repository access alone is insufficient for a successful status observation.
 
-## Prepare the checkout
+## Install or prepare a checkout
 
 This developer preview requires Python 3.10 or later. macOS and Linux provide
 the full local route, WSL follows the Linux/POSIX profile, and native Windows
@@ -25,7 +25,25 @@ Python executable, and follow any more specific host policy. Do not install
 software or change shell or global configuration merely to make an ambiguous
 interpreter resolve.
 
-From the repository root, inspect the active contract:
+Install the current public `main` branch as an isolated application with one of
+these commands:
+
+```text
+pipx install https://github.com/TrailblazerSR/ask-herdr/archive/refs/heads/main.zip
+```
+
+```text
+uv tool install "ask-herdr @ https://github.com/TrailblazerSR/ask-herdr/archive/refs/heads/main.zip"
+```
+
+Then inspect the active contract from any directory:
+
+```text
+ask-herdr machine describe --json
+```
+
+For a source-checkout fallback, run the repository wrapper with the approved
+interpreter:
 
 POSIX shell (replace the interpreter path):
 
@@ -45,7 +63,7 @@ Continue to validation or Machine Run only when discovery reports
 exact request and outcome schemas advertised by that same response:
 
 ```text
-/absolute/path/to/python3 bin/ask-herdr machine schema --id EXACT_ADVERTISED_ID
+ask-herdr machine schema --id EXACT_ADVERTISED_ID
 ```
 
 Do not copy stale schema IDs or selector fields from another checkout.
@@ -55,7 +73,19 @@ Do not copy stale schema IDs or selector fields from another checkout.
 Codex-compatible agents load `.agents/skills/ask-herdr/SKILL.md`. Claude Code
 loads `.claude/skills/ask-herdr/SKILL.md`, which points to the same canonical
 workflow. Start the agent from the repository so project instructions and
-skills are discoverable.
+skills are discoverable. The isolated CLI install does not write to global
+agent configuration.
+
+A three-command checkout setup provides both the installed CLI and the
+repository-local skills:
+
+```text
+git clone https://github.com/TrailblazerSR/ask-herdr.git
+cd ask-herdr
+pipx install .
+```
+
+`uv tool install .` is an equivalent final command.
 
 For an agent-mediated read, prepare and protect the bound request yourself.
 Give the agent only its canonical absolute path. The agent must not read,
@@ -113,7 +143,7 @@ validation and Machine Run are held in this release.
 Use the canonical absolute request path:
 
 ```text
-/absolute/path/to/python3 bin/ask-herdr machine run --request /canonical/absolute/private-request.json
+ask-herdr machine run --request /canonical/absolute/private-request.json
 ```
 
 Agent-mediated execution must use a file path, not stdin. After capture,
@@ -142,6 +172,6 @@ automatically.
 - Full local execution is supported on macOS and Linux; WSL uses its Linux
   profile. Native Windows is contract-only until a versioned Windows path,
   ACL, and Project-store contract exists.
-- There is no Project-binding/bootstrap workflow, installed package, hosted
-  service, human facade, provider-backed operation, deployment, or remote
-  execution surface.
+- There is no Project-binding/bootstrap workflow, package-registry release,
+  hosted service, human facade, provider-backed operation, deployment, or
+  remote execution surface.
