@@ -1,6 +1,6 @@
 # Platform support
 
-Ask-Herdr is a source-only Python developer preview. Its provider-free
+Ask-Herdr is a Git-installable Python developer preview. Its provider-free
 `query.status` path is native on macOS and Linux; WSL uses the Linux contract.
 Native Windows currently exposes contract discovery and bundled schemas only.
 
@@ -41,11 +41,23 @@ is the continuous-integration reference. If a Linux runtime or backing
 filesystem cannot provide those guarantees, the store adapter fails closed;
 it does not fall back to a check-then-rename or overwriting commit.
 
-## Source launch
+## Installed and source launch
 
-Use an approved Python interpreter and pass `bin/ask-herdr` as its script
-argument. In the examples below, replace the interpreter path with the exact
-approved executable for the host.
+The installed `ask-herdr` entry point is cross-platform and can be invoked from
+any directory:
+
+```text
+ask-herdr machine describe --json
+ask-herdr machine schema --id EXACT_ADVERTISED_ID
+```
+
+Install the current public `main` branch from its GitHub source archive with
+the `pipx` or `uv tool install` command documented in the README. This path
+does not require a Git checkout. No PyPI release is claimed.
+
+For a source-checkout fallback, use an approved Python interpreter and pass
+`bin/ask-herdr` as its script argument. In the examples below, replace the
+interpreter path with the exact approved executable for the host.
 
 POSIX shells:
 

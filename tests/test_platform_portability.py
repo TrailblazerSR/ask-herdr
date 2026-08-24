@@ -22,6 +22,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "bin" / "ask-herdr"
+CLI_MODULE = ROOT / "lib" / "ask_herdr_cli.py"
 sys.path.insert(0, str(ROOT / "lib"))
 
 from ask_herdr_platform import (  # noqa: E402
@@ -112,10 +113,10 @@ def _load_cli_as_win32():
         return original_import(name, globals, locals, fromlist, level)
 
     module_name = "ask_herdr_cli_simulated_win32_portability_test"
-    loader = SourceFileLoader(module_name, str(CLI))
+    loader = SourceFileLoader(module_name, str(CLI_MODULE))
     spec = importlib.util.spec_from_loader(module_name, loader)
     if spec is None or spec.loader is None:
-        raise AssertionError("could not load bin/ask-herdr")
+        raise AssertionError("could not load ask_herdr_cli")
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = module
     try:

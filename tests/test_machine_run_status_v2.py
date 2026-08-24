@@ -26,6 +26,7 @@ from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "bin" / "ask-herdr"
+CLI_MODULE = ROOT / "lib" / "ask_herdr_cli.py"
 sys.path.insert(0, str(ROOT / "lib"))
 
 from ask_herdr_json import canonical_json  # noqa: E402
@@ -54,10 +55,10 @@ def _cli_module():
     loaded = sys.modules.get(name)
     if loaded is not None:
         return loaded
-    loader = SourceFileLoader(name, str(CLI))
+    loader = SourceFileLoader(name, str(CLI_MODULE))
     spec = importlib.util.spec_from_loader(name, loader)
     if spec is None or spec.loader is None:
-        raise AssertionError("could not load bin/ask-herdr as a test module")
+        raise AssertionError("could not load lib/ask_herdr_cli.py as a test module")
     module = importlib.util.module_from_spec(spec)
     sys.modules[name] = module
     spec.loader.exec_module(module)

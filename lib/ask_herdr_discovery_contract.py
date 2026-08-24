@@ -7,17 +7,16 @@ without widening any existing request or storage contract.
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any, Dict
 
+from ask_herdr_resources import schema_path
 
-ROOT = Path(__file__).resolve().parents[1]
 
 DESCRIBE_V3_SCHEMA_ID = "ask_herdr.describe.v3"
-DESCRIBE_V3_SCHEMA_PATH = ROOT / "schemas" / f"{DESCRIBE_V3_SCHEMA_ID}.schema.json"
+DESCRIBE_V3_SCHEMA_PATH = schema_path(f"{DESCRIBE_V3_SCHEMA_ID}.schema.json")
 SCHEMA_DOCUMENT_V3_SCHEMA_ID = "ask_herdr.schema_document.v3"
-SCHEMA_DOCUMENT_V3_SCHEMA_PATH = (
-    ROOT / "schemas" / f"{SCHEMA_DOCUMENT_V3_SCHEMA_ID}.schema.json"
+SCHEMA_DOCUMENT_V3_SCHEMA_PATH = schema_path(
+    f"{SCHEMA_DOCUMENT_V3_SCHEMA_ID}.schema.json"
 )
 
 PUBLIC_SCHEMA_IDS_V3 = (

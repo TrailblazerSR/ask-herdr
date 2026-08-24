@@ -1,6 +1,6 @@
 # Ask-Herdr
 
-Ask-Herdr is an experimental, source-only interface for reading authenticated
+Ask-Herdr is an experimental command-line interface for reading authenticated
 Project metadata through one provider-free operation: `query.status`.
 
 [![CI](https://github.com/TrailblazerSR/ask-herdr/actions/workflows/ci.yml/badge.svg)](https://github.com/TrailblazerSR/ask-herdr/actions/workflows/ci.yml)
@@ -18,25 +18,42 @@ The command runs locally. It does not invoke an AI provider, Herdr, a network
 service, a hosted backend, or a remote/HPC resource. It does not create or
 discover Project bindings.
 
-## Quick start
+## Install
 
-From the repository root, use Python 3.10 or later to discover the current
-executable contract before trying an operation. On a POSIX shell:
+Install the current developer preview as an isolated application with either
+`pipx` or `uv`:
 
 ```text
-python3 bin/ask-herdr machine describe --json
+pipx install https://github.com/TrailblazerSR/ask-herdr/archive/refs/heads/main.zip
 ```
 
-On PowerShell:
+```text
+uv tool install "ask-herdr @ https://github.com/TrailblazerSR/ask-herdr/archive/refs/heads/main.zip"
+```
+
+Ask-Herdr has no runtime dependencies. These commands install the current
+public `main` branch without requiring a Git checkout; there is not yet a PyPI
+release or compatibility promise.
+
+## Quick start
+
+Discover the current executable contract before trying an operation:
 
 ```text
-& 'C:\Path\To\python.exe' 'bin/ask-herdr' machine describe --json
+ask-herdr machine describe --json
 ```
 
 Read `runtime_platform` and `features`, and continue only when the operation you
 need is advertised. Retrieve its exact schema ID from that same response:
 
 ```text
+ask-herdr machine schema --id EXACT_ADVERTISED_ID
+```
+
+For a source-checkout fallback, pass `bin/ask-herdr` to Python 3.10 or later:
+
+```text
+python3 bin/ask-herdr machine describe --json
 python3 bin/ask-herdr machine schema --id EXACT_ADVERTISED_ID
 ```
 
@@ -107,6 +124,21 @@ Codex-compatible agents discover the canonical workflow at
 adapter at `.claude/skills/ask-herdr/SKILL.md`; it delegates to the same
 canonical skill.
 
+Those are repository-local skills: open a source checkout in the agent to use
+them. Installing the CLI with `pipx` or `uv` does not write to global Codex or
+Claude Code configuration.
+
+For a CLI plus repository-managed agent onboarding:
+
+```text
+git clone https://github.com/TrailblazerSR/ask-herdr.git
+cd ask-herdr
+pipx install .
+```
+
+Use `uv tool install .` instead of the last command if preferred, then start
+Codex or Claude Code from that checkout.
+
 For an agent-mediated read, the Project owner prepares a mode-`0600` request
 outside the repository and supplies only its canonical absolute path. The
 request JSON, Project root, Authority UUID, and v1 validation output stay out
@@ -123,8 +155,9 @@ Herdr command. `query.status` itself does not use Herdr.
 - Only immediate, metadata-only observation with `advisory=none` executes.
 - macOS and Linux provide native Machine Validation and `query.status`; WSL
   uses the Linux profile; native Windows is contract-only.
-- There is no public Project bootstrap, package release, human facade, hosted
-  service, provider-backed operation, deployment, or compatibility promise.
+- There is no public Project bootstrap, package-registry release, human facade,
+  hosted service, provider-backed operation, deployment, or compatibility
+  promise.
 - A synthetic unbound Project normally returns a typed reconciliation or
   unavailable outcome; it cannot prove a real status observation.
 

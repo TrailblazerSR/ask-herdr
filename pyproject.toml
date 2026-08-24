@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ask-herdr"
+version = "0.4.0"
+description = "Provider-free authenticated Project metadata queries"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = []
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+[project.urls]
+Homepage = "https://github.com/TrailblazerSR/ask-herdr"
+Documentation = "https://github.com/TrailblazerSR/ask-herdr/tree/main/docs"
+Issues = "https://github.com/TrailblazerSR/ask-herdr/issues"
+
+[project.scripts]
+ask-herdr = "ask_herdr_cli:console_main"
+
+[tool.setuptools]
+include-package-data = true
+package-dir = {"" = "lib", "ask_herdr_schemas" = "schemas"}
+packages = ["ask_herdr_schemas"]
+py-modules = [
+  "ask_herdr_admin_payloads",
+  "ask_herdr_authority_store",
+  "ask_herdr_capsule",
+  "ask_herdr_capsule_contract",
+  "ask_herdr_cli",
+  "ask_herdr_control_payloads",
+  "ask_herdr_darwin_capsule",
+  "ask_herdr_discovery_contract",
+  "ask_herdr_herdr_transport",
+  "ask_herdr_human_first_lane",
+  "ask_herdr_journaled_provision",
+  "ask_herdr_json",
+  "ask_herdr_lane_index",
+  "ask_herdr_lane_store",
+  "ask_herdr_lane_turn",
+  "ask_herdr_linux_capsule",
+  "ask_herdr_machine_semantics",
+  "ask_herdr_machine_validate",
+  "ask_herdr_operation_contract",
+  "ask_herdr_outcome_contract",
+  "ask_herdr_outcome_v2_contract",
+  "ask_herdr_platform",
+  "ask_herdr_policy_ledger",
+  "ask_herdr_project_mutation_lease",
+  "ask_herdr_project_read_epoch",
+  "ask_herdr_project_status",
+  "ask_herdr_public_status",
+  "ask_herdr_recovery_reconcile",
+  "ask_herdr_request_header",
+  "ask_herdr_request_schema",
+  "ask_herdr_resources",
+  "ask_herdr_schema_validator",
+  "ask_herdr_topology_contract",
+  "ask_herdr_topology_store",
+  "ask_herdr_turn_payloads",
+]
+
+[tool.setuptools.package-data]
+ask_herdr_schemas = ["*.schema.json"]

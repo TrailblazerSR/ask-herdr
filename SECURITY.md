@@ -18,10 +18,10 @@ reporting channel without including vulnerability details in the public
 request. Do not open a public issue containing secrets, Project identity,
 private paths, exploit details, or provider credentials.
 
-Include the affected commit, macOS and Python versions, the public diagnostic
-code or typed outcome, and a reproduction that uses synthetic data. Maintainers
-will acknowledge and prioritize reports on a best-effort basis; this developer
-preview has no response-time guarantee.
+Include the affected commit, operating system and Python versions, the public
+diagnostic code or typed outcome, and a reproduction that uses synthetic data.
+Maintainers will acknowledge and prioritize reports on a best-effort basis;
+this developer preview has no response-time guarantee.
 
 ## Scope
 

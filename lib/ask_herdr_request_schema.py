@@ -3,21 +3,17 @@
 from __future__ import annotations
 
 import copy
-from pathlib import Path
 from typing import Any, Dict, Iterable, Mapping, Sequence
 
 from ask_herdr_admin_payloads import build_admin_payload_schema
 from ask_herdr_control_payloads import build_control_payload_schemas
 from ask_herdr_operation_contract import OPERATION_CONTRACTS, OperationContract
+from ask_herdr_resources import schema_path
 from ask_herdr_turn_payloads import build_turn_payload_schemas
 
 
 REQUEST_SCHEMA_ID = "ask_herdr.request.v1"
-REQUEST_SCHEMA_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "schemas"
-    / "ask_herdr.request.v1.schema.json"
-)
+REQUEST_SCHEMA_PATH = schema_path("ask_herdr.request.v1.schema.json")
 JSON_SCHEMA_DRAFT = "https://json-schema.org/draft/2020-12/schema"
 UUID4_PATTERN = (
     "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-"
