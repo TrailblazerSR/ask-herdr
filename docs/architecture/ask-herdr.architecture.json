@@ -1,0 +1,281 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Ask-Herdr query.status architecture",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/TrailblazerSR/ask-herdr",
+      "revision": "e770dbdbada6351dcb1016b23a92a353698552a8"
+    }
+  },
+  "components": [
+    {
+      "id": "private_request",
+      "type": "external",
+      "label": "Private request file",
+      "sublabel": "Owner-prepared path",
+      "pos": [40, 280],
+      "size": [170, 70]
+    },
+    {
+      "id": "cli",
+      "type": "backend",
+      "label": "ask-herdr CLI",
+      "sublabel": "Machine interface",
+      "pos": [260, 280],
+      "size": [165, 70],
+      "sources": [
+        { "path": "lib/ask_herdr_cli.py", "label": "CLI router" },
+        { "path": "bin/ask-herdr", "label": "Source launcher" }
+      ]
+    },
+    {
+      "id": "discovery",
+      "type": "backend",
+      "label": "Discovery + schemas",
+      "sublabel": "Runtime capabilities",
+      "pos": [250, 80],
+      "size": [185, 70],
+      "sources": [
+        { "path": "lib/ask_herdr_discovery_contract.py", "label": "Discovery contract" },
+        { "path": "schemas/ask_herdr.describe.v3.schema.json", "label": "Describe schema" }
+      ]
+    },
+    {
+      "id": "capture",
+      "type": "security",
+      "label": "Secure capture",
+      "sublabel": "Bounded strict JSON",
+      "pos": [480, 280],
+      "size": [175, 70],
+      "sources": [
+        { "path": "lib/ask_herdr_cli.py", "label": "Descriptor capture" }
+      ]
+    },
+    {
+      "id": "validation",
+      "type": "security",
+      "label": "Route + binding gate",
+      "sublabel": "query.status only",
+      "pos": [710, 280],
+      "size": [185, 70],
+      "sources": [
+        { "path": "lib/ask_herdr_request_header.py", "label": "Trusted header" },
+        { "path": "lib/ask_herdr_public_status.py", "label": "Dispatch + binding" }
+      ]
+    },
+    {
+      "id": "epoch",
+      "type": "backend",
+      "label": "Project Read Epoch",
+      "sublabel": "Stable authenticated view",
+      "pos": [960, 280],
+      "size": [190, 70],
+      "sources": [
+        { "path": "lib/ask_herdr_project_read_epoch.py", "label": "Epoch coordinator" }
+      ]
+    },
+    {
+      "id": "authority_store",
+      "type": "database",
+      "label": "Authority Store",
+      "sublabel": "Authenticated projection",
+      "pos": [720, 500],
+      "size": [180, 70],
+      "sources": [
+        { "path": "lib/ask_herdr_authority_store.py" }
+      ]
+    },
+    {
+      "id": "lane_index",
+      "type": "database",
+      "label": "Lane Index",
+      "sublabel": "Lane heads + identity",
+      "pos": [970, 500],
+      "size": [180, 70],
+      "sources": [
+        { "path": "lib/ask_herdr_lane_index.py" }
+      ]
+    },
+    {
+      "id": "topology_store",
+      "type": "database",
+      "label": "Topology Store",
+      "sublabel": "Key + operation views",
+      "pos": [1220, 500],
+      "size": [180, 70],
+      "sources": [
+        { "path": "lib/ask_herdr_topology_store.py" }
+      ]
+    },
+    {
+      "id": "selector",
+      "type": "backend",
+      "label": "Status selector",
+      "sublabel": "Project / Lane / Key / Op",
+      "pos": [1210, 280],
+      "size": [185, 70],
+      "sources": [
+        { "path": "lib/ask_herdr_project_status.py", "label": "Typed selectors" }
+      ]
+    },
+    {
+      "id": "projection",
+      "type": "security",
+      "label": "Public projection",
+      "sublabel": "Path-free typed outcome",
+      "pos": [1450, 280],
+      "size": [185, 70],
+      "sources": [
+        { "path": "lib/ask_herdr_public_status.py", "label": "Outcome adapter" },
+        { "path": "lib/ask_herdr_outcome_v2_contract.py", "label": "Envelope contract" }
+      ]
+    },
+    {
+      "id": "consumer",
+      "type": "external",
+      "label": "Agent / user",
+      "sublabel": "JSON + exit class",
+      "pos": [1690, 280],
+      "size": [160, 70]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Private local Project boundary",
+      "wraps": [
+        "private_request",
+        "capture",
+        "validation",
+        "epoch",
+        "authority_store",
+        "lane_index",
+        "topology_store",
+        "selector"
+      ],
+      "pad": 24
+    },
+    {
+      "kind": "security-group",
+      "label": "Path-free public boundary",
+      "wraps": ["projection", "consumer"],
+      "pad": 24
+    }
+  ],
+  "connections": [
+    {
+      "id": "request_to_cli",
+      "from": "private_request",
+      "to": "cli",
+      "label": "canonical path",
+      "variant": "security",
+      "labelAt": [235, 276]
+    },
+    {
+      "id": "cli_to_discovery",
+      "from": "cli",
+      "to": "discovery",
+      "label": "discover first",
+      "variant": "dashed"
+    },
+    {
+      "id": "cli_to_capture",
+      "from": "cli",
+      "to": "capture",
+      "label": "open selected file",
+      "variant": "emphasis",
+      "labelAt": [453, 276]
+    },
+    {
+      "id": "capture_to_validation",
+      "from": "capture",
+      "to": "validation",
+      "label": "strict JSON",
+      "variant": "security",
+      "labelAt": [683, 276]
+    },
+    {
+      "id": "validation_to_epoch",
+      "from": "validation",
+      "to": "epoch",
+      "label": "verified binding",
+      "variant": "emphasis",
+      "labelAt": [928, 276]
+    },
+    {
+      "id": "epoch_to_authority",
+      "from": "epoch",
+      "to": "authority_store",
+      "label": "read Authority ×2",
+      "labelAt": [815, 430]
+    },
+    {
+      "id": "epoch_to_lane",
+      "from": "epoch",
+      "to": "lane_index",
+      "label": "read Lane heads ×2",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [1058, 430]
+    },
+    {
+      "id": "epoch_to_topology",
+      "from": "epoch",
+      "to": "topology_store",
+      "label": "read Topology ×2",
+      "labelAt": [1300, 430]
+    },
+    {
+      "id": "epoch_to_selector",
+      "from": "epoch",
+      "to": "selector",
+      "label": "stable epoch",
+      "variant": "emphasis",
+      "labelAt": [1180, 276]
+    },
+    {
+      "id": "selector_to_projection",
+      "from": "selector",
+      "to": "projection",
+      "label": "typed status",
+      "variant": "emphasis",
+      "labelAt": [1423, 276]
+    },
+    {
+      "id": "projection_to_consumer",
+      "from": "projection",
+      "to": "consumer",
+      "label": "public envelope",
+      "variant": "security",
+      "labelAt": [1663, 276]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Private in",
+      "items": [
+        "Owner supplies only a canonical request path",
+        "Project root, Authority UUID, request JSON, and validation output stay private"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Authenticated local read",
+      "items": [
+        "Authority, Lane, and Topology projections must form one stable epoch",
+        "Observation is metadata-only and does not repair or mutate stores"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Public out",
+      "items": [
+        "Only query.status executes",
+        "No provider, Herdr, network service, hosted backend, or remote/HPC action"
+      ]
+    }
+  ]
+}

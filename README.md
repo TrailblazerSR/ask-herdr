@@ -88,6 +88,23 @@ the path-free outcome. The request JSON, Project root, Authority UUID,
 validation output, and raw durable records stay inside the owner-controlled
 boundary.
 
+### Source-grounded implementation architecture
+
+The map below follows the active `query.status` implementation from private
+request capture through the three authenticated local metadata projections to
+the path-free public result. Dormant contract vocabulary is intentionally
+excluded.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/ask-herdr-implementation-architecture.dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/assets/ask-herdr-implementation-architecture.light.png">
+  <img alt="Ask-Herdr implementation architecture: a private request path enters the local CLI, secure capture and binding gate read authenticated Authority, Lane, and Topology metadata through one stable Project Read Epoch, and a public projection returns path-free JSON without a provider, Herdr, network service, or HPC action." src="docs/assets/ask-herdr-implementation-architecture.light.png">
+</picture>
+
+See the [architecture notes and reproducible source](docs/architecture.md) for
+the exact Ask-Herdr revision, Archify version, scope limits, and typed diagram
+specification.
+
 ## Requirements
 
 - Python 3.10 or later;
