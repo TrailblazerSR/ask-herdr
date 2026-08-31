@@ -6,11 +6,7 @@ path in public Ask-Herdr commit
 `4addba80b8a75c406336368b4390a400a837672a`. It is a communication artifact;
 the executable and its advertised schemas remain authoritative.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/ask-herdr-implementation-architecture.dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="assets/ask-herdr-implementation-architecture.light.png">
-  <img alt="Ask-Herdr implementation architecture: a private request path enters the local CLI, secure capture and binding gate read authenticated Authority, Lane, and Topology metadata through one stable Project Read Epoch, and a public projection returns path-free JSON without a provider, Herdr, network service, or HPC action." src="assets/ask-herdr-implementation-architecture.light.png">
-</picture>
+![Ask-Herdr implementation architecture: a private request path enters the local CLI, secure capture and binding gate read authenticated Authority, Lane, and Topology metadata through one stable Project Read Epoch, and a public projection returns path-free JSON without a provider, Herdr, network service, or HPC action.](assets/ask-herdr-implementation-architecture.svg)
 
 ## Reading the map
 
@@ -69,11 +65,14 @@ node bin/archify.mjs validate architecture PATH_TO_ASK_HERDR/docs/architecture/a
 ```
 
 The recorded generation passed all nine showcase checks with zero composition
-errors and zero warnings. The light and dark README images are bounded
-1440×900 visual-evidence captures. The interactive HTML was intentionally not
+errors and zero warnings. From the verified HTML viewer, choose
+**Export → SVG** to download Archify's canonical graph-only vector. The README
+embeds that 1914×658 dual-theme SVG: it uses an internal
+`prefers-color-scheme` rule, contains no script or `foreignObject`, and has no
+external resource references. The interactive HTML was intentionally not
 committed because that generated viewer references externally hosted fonts and
-includes browser scripting. Static images keep the repository-facing diagram
-self-contained.
+includes browser scripting. The exported SVG keeps the repository-facing
+diagram self-contained and sharp at any display scale.
 
 When the active implementation architecture changes, update the pinned
 Ask-Herdr revision in the typed source, revalidate every source reference,
