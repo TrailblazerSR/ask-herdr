@@ -95,11 +95,7 @@ request capture through the three authenticated local metadata projections to
 the path-free public result. Dormant contract vocabulary is intentionally
 excluded.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/ask-herdr-implementation-architecture.dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="docs/assets/ask-herdr-implementation-architecture.light.png">
-  <img alt="Ask-Herdr implementation architecture: a private request path enters the local CLI, secure capture and binding gate read authenticated Authority, Lane, and Topology metadata through one stable Project Read Epoch, and a public projection returns path-free JSON without a provider, Herdr, network service, or HPC action." src="docs/assets/ask-herdr-implementation-architecture.light.png">
-</picture>
+![Ask-Herdr implementation architecture: a private request path enters the local CLI, secure capture and binding gate read authenticated Authority, Lane, and Topology metadata through one stable Project Read Epoch, and a public projection returns path-free JSON without a provider, Herdr, network service, or HPC action.](docs/assets/ask-herdr-implementation-architecture.svg)
 
 See the [architecture notes and reproducible source](docs/architecture.md) for
 the exact Ask-Herdr revision, Archify version, scope limits, and typed diagram
