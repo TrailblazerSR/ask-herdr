@@ -22,9 +22,6 @@ but does not replace discovery.
    for access and privacy rules. Read the
    [full public contract](../../../docs/public-beta-query-status.md) when
    constructing or interpreting a request or outcome.
-4. Use `bin/ask-herdr` for the Machine interface. The similarly named
-   `bin/ask-herdr-pipeline` is a legacy, stub-only Herdr prototype and is not
-   the `query.status` route.
 
 The boundary is established only when the repository, approved interpreter,
 host profile, and applicable public contract are identified.
